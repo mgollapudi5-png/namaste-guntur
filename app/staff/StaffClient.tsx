@@ -173,9 +173,9 @@ export default function StaffClient() {
         </div>
       )}
 
-      {/* 50-button grid */}
+      {/* 100-button grid */}
       <div className="max-w-2xl mx-auto grid grid-cols-5 sm:grid-cols-10 gap-2">
-        {Array.from({ length: 50 }, (_, i) => i + 1).map((n) => (
+        {Array.from({ length: 100 }, (_, i) => i + 1).map((n) => (
           <OrderButton
             key={n}
             number={n}
