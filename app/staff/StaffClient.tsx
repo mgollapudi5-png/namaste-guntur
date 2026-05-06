@@ -11,7 +11,6 @@ import {
 import { db } from "@/lib/firebase";
 import OrderButton from "@/components/OrderButton";
 
-const STAFF_PASSWORD = process.env.NEXT_PUBLIC_STAFF_PASSWORD ?? "";
 const ORDER_DURATION_MS = 30_000;
 
 export default function StaffClient() {
@@ -24,15 +23,29 @@ export default function StaffClient() {
   });
   const [passwordInput, setPasswordInput] = useState("");
   const [authError, setAuthError] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordInput === STAFF_PASSWORD) {
-      sessionStorage.setItem("staff_auth", "true");
-      setAuthenticated(true);
-    } else {
+    setAuthLoading(true);
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: passwordInput }),
+      });
+      if (res.ok) {
+        sessionStorage.setItem("staff_auth", "true");
+        setAuthenticated(true);
+      } else {
+        setAuthError(true);
+        setPasswordInput("");
+      }
+    } catch {
       setAuthError(true);
       setPasswordInput("");
+    } finally {
+      setAuthLoading(false);
     }
   };
 
@@ -127,9 +140,10 @@ export default function StaffClient() {
             </div>
             <button
               type="submit"
-              className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-colors"
+              disabled={authLoading}
+              className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold py-3 rounded-xl transition-colors"
             >
-              Sign In
+              {authLoading ? "Signing in…" : "Sign In"}
             </button>
           </form>
         </div>
